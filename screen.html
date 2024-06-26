@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Leaflet OSM Map with Polylines</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+        /* Custom tooltip style */
+        /* Remove the tooltip arrow */
+        .leaflet-tooltip.custom-tooltip::before,
+        .leaflet-tooltip.custom-tooltip::after {
+            display: none;
+        }
+        .leaflet-tooltip.custom-tooltip  {
+            background-color: transparent;
+            border: none;
+            box-shadow: none;
+            color: #2A96FF;
+            font-weight: bold;
+        }
+  
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-curve/leaflet.curve.js"></script>
+    <script src="https://unpkg.com/leaflet-rotatedmarker/leaflet.rotatedMarker.js"></script>
+    
+    <script>
+        // Initialize the map
+        var map = L.map('map').setView([ 23.566859417017785,58.38006331395399], 6);
+
+        // Add OpenStreetMap tile layer
+        var osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+        
+        // Add grayscale OSM tile layer
+        var grayscaleLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+        });
+
+        // Add layer control
+        var baseMaps = {
+            "OpenStreetMap": osmLayer,
+            "Grayscale": grayscaleLayer
+        };
+
+        L.control.layers(baseMaps).addTo(map);
+        // Custom airplane icon
+        var airplaneIcon = L.icon({
+            iconUrl: 'plane1.png', // Replace with your airplane icon URL
+            iconSize: [25, 25], // Size of the icon
+            iconAnchor: [12, 12], // Anchor point of the icon
+        });
+
+        // JSON data with polylines
+        var jsonData = [
+            
+            {
+                "type": "Feature",
+                "name":"Gwadar",
+                "geometry": {
+                    "type": "LineString",
+                    "coordinates": [
+                    [ 58.38006331395399,23.566859417017785 ],
+                        [   62.31388439388059,25.171324988911604 ]
+                    ]
+                }
+            },
+            {
+                "type": "Feature",
+                "name":"Karachi",
+                "geometry": {
+                    "type": "LineString",
+                    "coordinates": [
+                    [ 58.38006331395399,23.566859417017785 ],
+                        [  67.00690486219013 ,24.86345326762538]
+                    ]
+                }
+            },
+            {
+                "type": "Feature",
+                "name":"Mumbai",
+                "geometry": {
+                    "type": "LineString",
+                    "coordinates": [
+                    [ 58.38006331395399,23.566859417017785 ],
+                        [72.85158324137416,19.158522244060332 ]
+                    ]
+                }
+            },
+            
+            {
+                "type": "Feature",
+                "name":"Bengaluru",
+                "geometry": {
+                    "type": "LineString",
+                    "coordinates": [
+                    [ 58.38006331395399,23.566859417017785 ],
+                        [77.6306358237052,12.964805764692441  ]
+                    ]
+                }
+            },
+            {
+                "type": "Feature",
+                "name":"AbuDhabi",
+                "geometry": {
+                    "type": "LineString",
+                    "coordinates": [
+                    [ 58.38006331395399,23.566859417017785 ],
+                        [  54.8291424548287 ,24.461356031930425]
+                    ]
+                }
+            },
+            {
+                "type": "Feature",
+                "name":"Dubai",
+                "geometry": {
+                    "type": "LineString",
+                    "coordinates": [
+                    [ 58.38006331395399,23.566859417017785 ],
+                        [  55.77427638257258 ,25.180511511870197]
+                    ]
+                }
+            },
+            {
+                "type": "Feature",
+                "name":"Doha",
+                "geometry": {
+                    "type": "LineString",
+                    "coordinates": [
+                    [ 58.38006331395399,23.566859417017785 ],
+                        [  53.200111162362596 ,25.55212622919082]
+                    ]
+                }
+            },
+            {
+                "type": "Feature",
+                "name":"Bandar Abbas",
+                "geometry": {
+                    "type": "LineString",
+                    "coordinates": [
+                    [ 58.38006331395399,23.566859417017785 ],
+                        [  56.324162824430175 ,27.194524786293027]
+                    ]
+                }
+            },{
+                "type": "Feature",
+                "name":"Riyadh",
+                "geometry": {
+                    "type": "LineString",
+                    "coordinates": [
+                    [ 58.38006331395399,23.566859417017785 ],
+                        [ 51.897885699056985 ,24.270964471401303]
+                    ]
+                }
+            } ,{
+                "type": "Feature",
+                "name":"Lahore",
+                "geometry": {
+                    "type": "LineString",
+                    "coordinates": [
+                    [ 58.38006331395399,23.566859417017785 ],
+                        [ 74.36567744638742 , 31.52288342101572]
+                    ]
+                }
+            } ,{
+                "type": "Feature",
+                "name":"Lahore",
+                "geometry": {
+                    "type": "LineString",
+                    "coordinates": [
+                    [ 58.38006331395399,23.566859417017785 ],
+                    [ 72.56514256637386 ,  23.018752285400495]
+                    ]
+                }
+            }, 
+        ];
+            // Function to calculate the bearing between two points
+       
+            function calculateBearing(lat1, lon1, lat2, lon2) {
+            var φ1 = lat1 * Math.PI / 180;
+            var φ2 = lat2 * Math.PI / 180;
+            var Δλ = (lon2 - lon1) * Math.PI / 180;
+            var y = Math.sin(Δλ) * Math.cos(φ2);
+            var x = Math.cos(φ1) * Math.sin(φ2) -
+                    Math.sin(φ1) * Math.cos(φ2) * Math.cos(Δλ);
+            var θ = Math.atan2(y, x);
+            var bearing = (θ * 180 / Math.PI + 360) % 360;
+            return bearing;
+        }
+
+
+         // Function to create a curved line
+         function addCurve(coord1, coord2, label) {
+            var midPoint = [
+                (coord1[1] + coord2[1]) / 2 + 0.5, 
+                (coord1[0] + coord2[0]) / 2 + 0.5
+            ];
+            var latlngs = [
+                'M', [coord1[1], coord1[0]],
+                'Q', [midPoint[0], midPoint[1]], [coord2[1], coord2[0]]
+            ];
+            L.curve(latlngs, {color: '#2A96FF', weight: 1}).addTo(map);
+
+             // Calculate the position for the airplane icon (outer side of the curve)
+             var iconLatLng = [
+                coord1[1] ,
+                coord1[0] 
+            ];
+
+            var bearing = calculateBearing(coord2[1], coord2[0], coord1[1], coord1[0]);
+            console.log("Bearing"+Math.round(bearing));
+            // Add rotated airplane icon marker to the map
+            // Add rotated airplane icon marker to the map
+            var marker = L.marker(iconLatLng, {
+                icon: airplaneIcon,
+                rotationAngle: Math.round(bearing),
+                rotationOrigin: 'center'
+            }).addTo(map);
+
+            marker.bindTooltip(label, {permanent: true, direction: 'top', offset: [0, 0], className: 'custom-tooltip' }).openTooltip();
+        }
+
+        // Add curves to the map
+        jsonData.forEach(function(feature) {
+            var coordinates = feature.geometry.coordinates;
+            var label = feature.name;
+            addCurve(coordinates[1], coordinates[0], label);
+        });
+
+        map.set
+    </script>
+</body>
+</html>
