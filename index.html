@@ -1,248 +1,224 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Leaflet OSM Map with Polylines</title>
-    <meta charset="utf-8" />
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaflet Map with Esri World Gray Canvas Basemap</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <style>
-        html, body {
-            height: 100%;
-            margin: 0;
-        }
         #map {
+            height: 90vh;
             width: 100%;
-            height: 100%;
         }
-        /* Custom tooltip style */
-        /* Remove the tooltip arrow */
-        .leaflet-tooltip.custom-tooltip::before,
-        .leaflet-tooltip.custom-tooltip::after {
-            display: none;
+        #controls {
+            height: 10vh;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #d6e028;
+            color: white;
+            font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+            font: 500;
+            font-size: larger;
         }
-        .leaflet-tooltip.custom-tooltip  {
-            background-color: transparent;
-            border: none;
-            box-shadow: none;
-            color: #2A96FF;
-            font-weight: bold;
+        #originSelect {
+            padding: 5px;
+            font-size: 16px;
         }
-  
     </style>
 </head>
 <body>
+    <div id="controls">
+        <label for="originSelect">Where would you like to start your journey from?</label>
+        <select id="originSelect">
+            <option value="">--Select Origin--</option>
+        </select>
+    </div>
     <div id="map"></div>
+
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-    <script src="https://unpkg.com/leaflet-curve/leaflet.curve.js"></script>
-    <script src="https://unpkg.com/leaflet-rotatedmarker/leaflet.rotatedMarker.js"></script>
-    
     <script>
-        // Initialize the map
-        var map = L.map('map').setView([ 23.566859417017785,58.38006331395399], 6);
+        // Initialize the map and set its view to Muscat, Oman
+        var map = L.map('map').setView([23.5880, 58.3829], 4);
 
-        // Add OpenStreetMap tile layer
-        var osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(map);
-        
-        // Add grayscale OSM tile layer
-        var grayscaleLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+        // Add Esri World Gray Canvas basemap
+        var Esri_WorldGrayCanvas = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ',
+            maxZoom: 10
         });
 
-        // Add layer control
-        var baseMaps = {
-            "OpenStreetMap": osmLayer,
-            "Grayscale": grayscaleLayer
-        };
+        // Add the basemap to the map
+        Esri_WorldGrayCanvas.addTo(map);
 
-        L.control.layers(baseMaps).addTo(map);
-        // Custom airplane icon
-        var airplaneIcon = L.icon({
-            iconUrl: 'plane1.png', // Replace with your airplane icon URL
-            iconSize: [25, 25], // Size of the icon
-            iconAnchor: [12, 12], // Anchor point of the icon
-        });
+        var currentDestinationMarkers = [];
+        var currentLines = [];
+        var originMarkers = [];
+        var transitMarkers = [];
+        var data;
 
-        // JSON data with polylines
-        var jsonData = [
-            
-            {
-                "type": "Feature",
-                "name":"Gwadar",
-                "geometry": {
-                    "type": "LineString",
-                    "coordinates": [
-                    [ 58.38006331395399,23.566859417017785 ],
-                        [   62.31388439388059,25.171324988911604 ]
-                    ]
-                }
-            },
-            {
-                "type": "Feature",
-                "name":"Karachi",
-                "geometry": {
-                    "type": "LineString",
-                    "coordinates": [
-                    [ 58.38006331395399,23.566859417017785 ],
-                        [  67.00690486219013 ,24.86345326762538]
-                    ]
-                }
-            },
-            {
-                "type": "Feature",
-                "name":"Mumbai",
-                "geometry": {
-                    "type": "LineString",
-                    "coordinates": [
-                    [ 58.38006331395399,23.566859417017785 ],
-                        [72.85158324137416,19.158522244060332 ]
-                    ]
-                }
-            },
-            
-            {
-                "type": "Feature",
-                "name":"Bengaluru",
-                "geometry": {
-                    "type": "LineString",
-                    "coordinates": [
-                    [ 58.38006331395399,23.566859417017785 ],
-                        [77.6306358237052,12.964805764692441  ]
-                    ]
-                }
-            },
-            {
-                "type": "Feature",
-                "name":"AbuDhabi",
-                "geometry": {
-                    "type": "LineString",
-                    "coordinates": [
-                    [ 58.38006331395399,23.566859417017785 ],
-                        [  54.8291424548287 ,24.461356031930425]
-                    ]
-                }
-            },
-            {
-                "type": "Feature",
-                "name":"Dubai",
-                "geometry": {
-                    "type": "LineString",
-                    "coordinates": [
-                    [ 58.38006331395399,23.566859417017785 ],
-                        [  55.77427638257258 ,25.180511511870197]
-                    ]
-                }
-            },
-            {
-                "type": "Feature",
-                "name":"Doha",
-                "geometry": {
-                    "type": "LineString",
-                    "coordinates": [
-                    [ 58.38006331395399,23.566859417017785 ],
-                        [  53.200111162362596 ,25.55212622919082]
-                    ]
-                }
-            },
-            {
-                "type": "Feature",
-                "name":"Bandar Abbas",
-                "geometry": {
-                    "type": "LineString",
-                    "coordinates": [
-                    [ 58.38006331395399,23.566859417017785 ],
-                        [  56.324162824430175 ,27.194524786293027]
-                    ]
-                }
-            },{
-                "type": "Feature",
-                "name":"Riyadh",
-                "geometry": {
-                    "type": "LineString",
-                    "coordinates": [
-                    [ 58.38006331395399,23.566859417017785 ],
-                        [ 51.897885699056985 ,24.270964471401303]
-                    ]
-                }
-            } ,{
-                "type": "Feature",
-                "name":"Lahore",
-                "geometry": {
-                    "type": "LineString",
-                    "coordinates": [
-                    [ 58.38006331395399,23.566859417017785 ],
-                        [ 74.36567744638742 , 31.52288342101572]
-                    ]
-                }
-            } ,{
-                "type": "Feature",
-                "name":"Lahore",
-                "geometry": {
-                    "type": "LineString",
-                    "coordinates": [
-                    [ 58.38006331395399,23.566859417017785 ],
-                    [ 72.56514256637386 ,  23.018752285400495]
-                    ]
-                }
-            }, 
-        ];
-            // Function to calculate the bearing between two points
-       
-            function calculateBearing(lat1, lon1, lat2, lon2) {
-            var φ1 = lat1 * Math.PI / 180;
-            var φ2 = lat2 * Math.PI / 180;
-            var Δλ = (lon2 - lon1) * Math.PI / 180;
-            var y = Math.sin(Δλ) * Math.cos(φ2);
-            var x = Math.cos(φ1) * Math.sin(φ2) -
-                    Math.sin(φ1) * Math.cos(φ2) * Math.cos(Δλ);
-            var θ = Math.atan2(y, x);
-            var bearing = (θ * 180 / Math.PI + 360) % 360;
-            return bearing;
+        // Function to create a circle marker with given options
+        function createCircleMarker(lat, lon, options) {
+            return L.circleMarker([lat, lon], options).addTo(map);
         }
 
-
-         // Function to create a curved line
-         function addCurve(coord1, coord2, label) {
-            var midPoint = [
-                (coord1[1] + coord2[1]) / 2 + 0.5, 
-                (coord1[0] + coord2[0]) / 2 + 0.5
-            ];
-            var latlngs = [
-                'M', [coord1[1], coord1[0]],
-                'Q', [midPoint[0], midPoint[1]], [coord2[1], coord2[0]]
-            ];
-            L.curve(latlngs, {color: '#2A96FF', weight: 1}).addTo(map);
-
-             // Calculate the position for the airplane icon (outer side of the curve)
-             var iconLatLng = [
-                coord1[1] ,
-                coord1[0] 
-            ];
-
-            var bearing = calculateBearing(coord2[1], coord2[0], coord1[1], coord1[0]);
-            console.log("Bearing"+Math.round(bearing));
-            // Add rotated airplane icon marker to the map
-            // Add rotated airplane icon marker to the map
-            var marker = L.marker(iconLatLng, {
-                icon: airplaneIcon,
-                rotationAngle: Math.round(bearing),
-                rotationOrigin: 'center'
+        // Function to create a square marker
+        function createSquareMarker(lat, lon, options) {
+            return L.marker([lat, lon], {
+                icon: L.divIcon({
+                    className: 'custom-square-marker',
+                    html: `<div style="width: 12px; height: 12px; background-color: ${options.fillColor}; border: 2px solid ${options.color};"></div>`
+                })
             }).addTo(map);
-
-            marker.bindTooltip(label, {permanent: true, direction: 'top', offset: [0, 0], className: 'custom-tooltip' }).openTooltip();
         }
 
-        // Add curves to the map
-        jsonData.forEach(function(feature) {
-            var coordinates = feature.geometry.coordinates;
-            var label = feature.name;
-            addCurve(coordinates[1], coordinates[0], label);
+
+        
+        // Function to clear existing destination markers and lines
+        function clearDestinationMarkers() {
+            currentDestinationMarkers.forEach(marker => map.removeLayer(marker));
+            currentDestinationMarkers = [];
+            transitMarkers.forEach(marker => map.removeLayer(marker));
+            transitMarkers = [];
+            currentLines.forEach(line => map.removeLayer(line));
+            currentLines = [];
+        }
+
+        // Function to add markers to the map
+        function addMarkers(data) {
+            data.forEach(item => {
+                var origin = item.origin;
+                var destinations = item.destinations;
+                var transit = item.transit;
+
+                // Create origin marker
+                var originMarker = createCircleMarker(origin.lat, origin.lon, {
+                    color: '#A7A9AC', // Pantone 877C
+                    fillColor: '#A7A9AC',
+                    fillOpacity: 1,
+                    radius: 8
+                }).bindPopup(`<b>Origin:</b> ${origin.name}`);
+
+                originMarkers.push({
+                    marker: originMarker,
+                    destinations: destinations,
+                    transit: transit
+                });
+
+
+                // Add origin to the dropdown menu
+                var option = document.createElement('option');
+                option.value = origin.name;
+                option.textContent = origin.name;
+                document.getElementById('originSelect').appendChild(option);
+            });
+        }
+
+        // Function to update destination markers and lines based on selected origin
+        function updateDestinationMarkers(originName) {
+            clearDestinationMarkers();
+            originMarkers.forEach(item => {
+                if (item.marker.getPopup().getContent().includes(`<b>Origin:</b> ${originName}`)) {
+                    item.marker.setStyle({
+                        color: '#FFFFFF', // White stroke
+                        fillColor: '#00acca', // Origin fill color
+                        fillOpacity: 1,
+                        radius: 12
+                    });
+
+                    if(item.transit.name == "No Transit"){
+                        console.log("Coming Here");
+                        item.destinations.forEach(destination => {
+                            var destinationMarker = createCircleMarker(destination.lat, destination.lon, {
+                                color: '#FFFFFF', // White stroke
+                                fillColor: '#81b43f', // Destination fill color
+                                radius: 8,
+                                fillOpacity: 1,
+                            }).bindPopup(`<b>Destination:</b> ${destination.name}`);
+
+                            currentDestinationMarkers.push(destinationMarker);
+
+                            // Draw straight lines between origin, transit, and destination
+                            var line1 = L.polyline([[item.marker.getLatLng().lat, item.marker.getLatLng().lng], [destination.lat, destination.lon]], {
+                                color: '#81b43f', // Destination color
+                                weight: 2
+                            }).addTo(map);
+                            currentLines.push(line1);
+                        });
+                    }
+                    
+                    else {
+
+                    // Create transit marker
+                    var transitMarker = createSquareMarker(item.transit.lat, item.transit.lon, {
+                        color: '#FFFFFF', // Pantone 877C
+                        fillColor: '#00acca'
+                    }).bindPopup(`<b>Transit:</b> ${item.transit.name}`);
+
+                    transitMarkers.push(transitMarker);
+
+                        item.destinations.forEach(destination => {
+                        var destinationMarker = createCircleMarker(destination.lat, destination.lon, {
+                            color: '#FFFFFF', // White stroke
+                            fillColor: '#81b43f', // Destination fill color
+                            radius: 8,
+                            fillOpacity: 1,
+                        }).bindPopup(`<b>Destination:</b> ${destination.name}`);
+
+                        currentDestinationMarkers.push(destinationMarker);
+
+                        // Draw straight lines between origin, transit, and destination
+                        var line1 = L.polyline([[item.marker.getLatLng().lat, item.marker.getLatLng().lng], [item.transit.lat, item.transit.lon]], {
+                            color: '#81b43f', // Destination color
+                            weight: 2
+                        }).addTo(map);
+                        currentLines.push(line1);
+
+                        var line2 = L.polyline([[item.transit.lat, item.transit.lon], [destination.lat, destination.lon]], {
+                            color: '#81b43f', // Destination color
+                            weight: 2
+                        }).addTo(map);
+                        currentLines.push(line2);
+                        });
+
+                    }
+                } else {
+                    item.marker.setStyle({
+                        color: '#A7A9AC', // Pantone 877C
+                        fillColor: '#A7A9AC',
+                        fillOpacity: 1,
+                        radius: 8
+                    });
+                }
+            });
+        }
+
+        // Add event listener for the dropdown menu
+        document.getElementById('originSelect').addEventListener('change', function() {
+            var selectedOrigin = this.value;
+            if (selectedOrigin) {
+                updateDestinationMarkers(selectedOrigin);
+            } else {
+                clearDestinationMarkers();
+                originMarkers.forEach(item => {
+                    item.marker.setStyle({
+                        color: '#A7A9AC', // Pantone 877C
+                        fillColor: '#A7A9AC',
+                        fillOpacity: 1,
+                        radius: 8
+                    });
+                });
+            }
         });
 
-        map.set
+        // Fetch JSON data and add markers to the map
+        fetch('output.json')
+            .then(response => response.json())
+            .then(jsonData => {
+                data = jsonData;
+                addMarkers(data);
+            })
+            .catch(error => console.error('Error fetching JSON data:', error));
     </script>
 </body>
 </html>
